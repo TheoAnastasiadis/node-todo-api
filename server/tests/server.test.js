@@ -61,3 +61,10 @@ describe('POST /todos', () => {
             })
     })
 })
+
+describe('GET /todos', () => {
+    it('should return all todos', () => {
+        request(app).get('/todos')
+            .expect(200)
+    })
+})
