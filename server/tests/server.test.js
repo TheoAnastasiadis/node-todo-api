@@ -4,10 +4,14 @@ const request = require('supertest')
 const {app} = require('./../server')
 const {Todo} = require('./../models/todo')
 
+const {ObjectID} = require('mongodb')
+
 const todos = [{
-    text: "First test todo"
+    text: "First test todo",
+    _id: '5b51d4739aa1684160e933f2'
 },{
-    text: "Second test todo"
+    text: "Second test todo",
+    _id: '5b51d9337a5d13382863bbfa'
 }]
 
 beforeEach((done) => {
@@ -77,6 +81,40 @@ describe('GET /todos', () => {
             .expect(200)
             .expect((res) => {
                 expect(res.body.todos.length).toBe(2)
+            })
+            .end(done)
+    })
+})
+
+describe('GET /todos/:id', () => {
+    it('should return 404 if ID not valid', (done) => {
+        var wrongID = '123'
+        request(app).get(`/todos/${wrongID}`)
+            .expect(404)
+            .expect((res) => {
+                expect(res.body.message).toBe("ID is not valid.")
+            })
+            .end(done)
+    })
+
+    it('should return 404 when todo with non-existent ID is not found', (done) => {
+        var nonExistentID = '5b51d9337a5d13382863bbf9'
+        request(app).get(`/todos/${nonExistentID}`)
+            .expect(404)
+            .expect((res) => {
+                expect(res.body.message).toBe("Todo not found.")
+            })
+            .end(done)
+    })
+
+    it('should return todo when ID exists', (done) => {
+        request(app).get(`/todos/${todos[0]._id}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todos.text).toBe("First test todo")
+            })
+            .expect((res) => {
+                expect(res.body.todos._id).toBe(todos[0]._id)
             })
             .end(done)
     })
